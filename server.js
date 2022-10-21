@@ -16,3 +16,10 @@ app.get('/news', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 })
+app.get('/write', (req, res) => {
+    res.sendFile(__dirname + '/write.html')
+})
+app.post('/add', (req, res) => {
+    res.send('전송 완료!')
+})
+
