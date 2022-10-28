@@ -14,11 +14,6 @@ MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.
     // todoapp이라는 db에 연결
     db = client.db('todoapp');
 
-    // post라는 파일에 insertOne {자료}
-    // db.collection('post').insertOne({_id : 0, 이름 : 'kim', age : 29}, (err, res) => {
-    //     console.log('저장완료');
-    // });
-
     // db연결 되면 실행 할 코드 
     app.listen(2020, () => {
         console.log('2020port')
@@ -26,9 +21,18 @@ MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.
 
 
     app.post('/add', (req, res) => {
-        db.collection('post').insertOne({ title : req.body.title, date : req.body.date}, (err, res) => {
-            console.log('form 데이터 저장 완료.')
-        })
+        db.collection('counter').findOne({name : '게시물갯수'}, (err, result) => {
+            let countId = result.totalPost;
+            db.collection('post').insertOne({ _id : countId + 1, title : req.body.title, date : req.body.date}, (err, res) => {
+                console.log('form 데이터 저장 완료.')
+
+                // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
+                db.collection('counter').updateOne({name : '게시물갯수'}, { $inc : {totalPost:1} }, (err, result) => {
+                    if(err) {return console.log('에러')}
+                })  
+            })
+        });
+       
         res.send('전송 완료!')
     })
     // 데이터를 꺼낼때나 저장할때 db.collection('')로 무조건 시작 후 find, insertOne 등등 사용 하면 된다.
@@ -56,15 +60,20 @@ app.get('/list', (req, res) => {
         console.log(result);
         res.render('list.ejs', {todos : result});
     });
-
     
 })
-
-// app.post('/add', (req, res) => {
-//     // console창에 출력만 하지말고 클라이언트가 보낸 데이터를 db에 영구적으로 저장을 해보자
-//     // console.log(req.body);
-//     console.log(req.body.title);
-//     console.log(req.body.date);
-//     res.send('전송 완료!')
-// })
+// delete 요청
+app.delete('/delete', (req, res) => {
+    // list.ejs에서의 ajax요청 데이터
+    // console.log(req.body);
+    req.body._id = parseInt(req.body._id);
+    // deleteOne 함수 파라미터 = query문, callback
+    db.collection('post').deleteOne( req.body, (err, result) => {
+        console.log('삭제완료');
+        res.status(200).send( {message: '성공!'} )
+    })
+    db.collection('counter').updateOne({name : '게시물갯수'}, { $inc : {totalPost:-1} }, (err, result) => {
+        if(err) {return console.log('에러')}
+    })  
+})
 
