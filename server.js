@@ -62,18 +62,27 @@ app.get('/list', (req, res) => {
     });
     
 })
+app.get('/detail:id', (req, res) => {
+    db.collection('post').find().toArray( (err, result) => {
+        res.render('detail.ejs', {todos : result});
+    })
+})
 // delete 요청
 app.delete('/delete', (req, res) => {
     // list.ejs에서의 ajax요청 데이터
     // console.log(req.body);
+
     req.body._id = parseInt(req.body._id);
+
     // deleteOne 함수 파라미터 = query문, callback
     db.collection('post').deleteOne( req.body, (err, result) => {
-        console.log('삭제완료');
+        
+
+        // 응답을 꼭 설정해야 list.ejs에서의 ajax요청에서 done()이 작동함.
+        // 성공
         res.status(200).send( {message: '성공!'} )
+        // 실패
+        // res.status(200).send( {message: '실패!'} )
     })
-    db.collection('counter').updateOne({name : '게시물갯수'}, { $inc : {totalPost:-1} }, (err, result) => {
-        if(err) {return console.log('에러')}
-    })  
 })
 
