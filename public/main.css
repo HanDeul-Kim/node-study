@@ -1,0 +1,36 @@
+.list-wrap {
+    max-width: 90%;
+    width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+}
+
+.list {
+    width: 100%;
+    margin: 10px 0;
+    /* position: relative; */
+    padding: 20px;
+    border-radius: 20px;
+    border: 2px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+
+.list_btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.list_btn button {
+    outline: none;
+    border: none;
+    background: #000;
+    border-radius: 20px;
+    padding: 5px 10px;
+    color: #fff;
+}

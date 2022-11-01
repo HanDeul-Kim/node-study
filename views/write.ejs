@@ -11,32 +11,19 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/">Todo App</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-link" href="/write">Write</a>
-                <a class="nav-link" href="/list">data 확인</a>
-            </div>
-        </div>
-    </nav>
+    <!-- nav -->
+    <%- include('nav.html') %>
     <!-- 두 가지 설정 해주지 않으면 form의 데이터가 서버로 전달할 수 없음. -->
     <form style="margin:100px auto; max-width: 1200px; padding:0 25px;" action="/add" method="POST">
         <div class="form-group">
             <label>해야 할 일</label>
-            <input type="text" class="form-control" name="title">
-            <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+            <input type="text" class="form-control" name="title" placeholder="할 일을 등록해 보세요~">
         </div>
         <div class="form-group">
             <label>마감일</label>
-            <input type="text" class="form-control" name="date">
+            <input type="text" class="form-control" name="date" placeholder="언제까지 할 건가요?">
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">게시</button>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"

@@ -5,6 +5,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }))
 // ejs
 app.set('view engine', 'ejs');
+// public폴더 사용
+app.use('/public', express.static('public'))
 // MongoDB
 const MongoClient = require('mongodb').MongoClient;
 let db;
@@ -47,24 +49,26 @@ app.get('/news', (req, res) => {
 
 // html 파일 보내보기
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html')
+    // res.sendFile(__dirname + '/index.html')
+    res.render('index.ejs');
 })
 app.get('/write', (req, res) => {
-    res.sendFile(__dirname + '/write.html')
+    // res.sendFile(__dirname + '/write.html')
+    res.render('write.ejs');
 })
 // ejs 파일 보내보기 (views라는 이름의 폴더를 만들고 넣어야함.)
 app.get('/list', (req, res) => {
 
     // post라는 collection안의 모든 데이터를 꺼내보자
     db.collection('post').find().toArray( (err, result) => {
-        console.log(result);
         res.render('list.ejs', {todos : result});
     });
     
 })
-app.get('/detail:id', (req, res) => {
-    db.collection('post').find().toArray( (err, result) => {
-        res.render('detail.ejs', {todos : result});
+app.get('/detail/:id', (req, res) => {
+    
+    db.collection('post').findOne({_id : Number(req.params.id)}, (err, result) => {
+        res.render('detail.ejs', {data : result});
     })
 })
 // delete 요청
@@ -82,7 +86,13 @@ app.delete('/delete', (req, res) => {
         // 성공
         res.status(200).send( {message: '성공!'} )
         // 실패
-        // res.status(200).send( {message: '실패!'} )
+        // res.status(500).send( {message: '실패!'} )
     })
 })
 
+app.get('/edit/:id', (req, res) => {
+    db.collection('post').findOne({_id : Number(req.params.id)}, (err, result) => {
+        res.render('edit.ejs', { post : result})
+    })
+    
+})
