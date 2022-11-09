@@ -9,9 +9,12 @@ app.set('view engine', 'ejs');
 app.use('/public', express.static('public'))
 // MongoDB
 const MongoClient = require('mongodb').MongoClient;
+// method-override (put,delete요청 라이브러리)
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'))
 let db;
 MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.net/?retryWrites=true&w=majority', { useUnifiedTopology: true }, (err, client) => {
-    if(err) return console.log('에러~')
+    if (err) return console.log('에러~')
 
     // todoapp이라는 db에 연결
     db = client.db('todoapp');
@@ -23,18 +26,18 @@ MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.
 
 
     app.post('/add', (req, res) => {
-        db.collection('counter').findOne({name : '게시물갯수'}, (err, result) => {
+        db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
             let countId = result.totalPost;
-            db.collection('post').insertOne({ _id : countId + 1, title : req.body.title, date : req.body.date}, (err, res) => {
+            db.collection('post').insertOne({ _id: countId + 1, title: req.body.title, date: req.body.date }, (err, res) => {
                 console.log('form 데이터 저장 완료.')
 
                 // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
-                db.collection('counter').updateOne({name : '게시물갯수'}, { $inc : {totalPost:1} }, (err, result) => {
-                    if(err) {return console.log('에러')}
-                })  
+                db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, (err, result) => {
+                    if (err) { return console.log('에러') }
+                })
             })
         });
-       
+
         res.send('전송 완료!')
     })
     // 데이터를 꺼낼때나 저장할때 db.collection('')로 무조건 시작 후 find, insertOne 등등 사용 하면 된다.
@@ -60,15 +63,15 @@ app.get('/write', (req, res) => {
 app.get('/list', (req, res) => {
 
     // post라는 collection안의 모든 데이터를 꺼내보자
-    db.collection('post').find().toArray( (err, result) => {
-        res.render('list.ejs', {todos : result});
+    db.collection('post').find().toArray((err, result) => {
+        res.render('list.ejs', { todos: result });
     });
-    
+
 })
 app.get('/detail/:id', (req, res) => {
-    
-    db.collection('post').findOne({_id : Number(req.params.id)}, (err, result) => {
-        res.render('detail.ejs', {data : result});
+
+    db.collection('post').findOne({ _id: Number(req.params.id) }, (err, result) => {
+        res.render('detail.ejs', { data: result });
     })
 })
 // delete 요청
@@ -79,20 +82,27 @@ app.delete('/delete', (req, res) => {
     req.body._id = parseInt(req.body._id);
 
     // deleteOne 함수 파라미터 = query문, callback
-    db.collection('post').deleteOne( req.body, (err, result) => {
-        
+    db.collection('post').deleteOne(req.body, (err, result) => {
+
 
         // 응답을 꼭 설정해야 list.ejs에서의 ajax요청에서 done()이 작동함.
         // 성공
-        res.status(200).send( {message: '성공!'} )
+        res.status(200).send({ message: '성공!' })
         // 실패
         // res.status(500).send( {message: '실패!'} )
     })
 })
 
 app.get('/edit/:id', (req, res) => {
-    db.collection('post').findOne({_id : Number(req.params.id)}, (err, result) => {
-        res.render('edit.ejs', { post : result})
+    db.collection('post').findOne({ _id: Number(req.params.id) }, (err, result) => {
+        res.render('edit.ejs', { post: result })
     })
-    
 })
+
+app.put('/edit', (req, res) => {
+    db.collection('post').updateOne({ _id: parseInt(req.body.id) }, { $set: { title: req.body.title, date: req.body.date } }, (err, result) => {
+        console.log('수정 완료')
+        console.log(err);
+    })
+})
+
