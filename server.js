@@ -77,7 +77,7 @@ app.get('/detail/:id', (req, res) => {
 // delete 요청
 app.delete('/delete', (req, res) => {
     // list.ejs에서의 ajax요청 데이터
-    // console.log(req.body);
+    console.log(req.body);
 
     req.body._id = parseInt(req.body._id);
 
@@ -101,8 +101,7 @@ app.get('/edit/:id', (req, res) => {
 
 app.put('/edit', (req, res) => {
     db.collection('post').updateOne({ _id: parseInt(req.body.id) }, { $set: { title: req.body.title, date: req.body.date } }, (err, result) => {
-        console.log('수정 완료')
-        console.log(err);
+        console.log('put요청 성공')
+        res.redirect('/list')
     })
 })
-
