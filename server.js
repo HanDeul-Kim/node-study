@@ -11,6 +11,7 @@ app.use('/public', express.static('public'))
 const MongoClient = require('mongodb').MongoClient;
 // method-override (put,delete요청 라이브러리)
 const methodOverride = require('method-override');
+const { list } = require('mongodb/lib/gridfs/grid_store');
 app.use(methodOverride('_method'))
 let db;
 MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.net/?retryWrites=true&w=majority', { useUnifiedTopology: true }, (err, client) => {
@@ -102,6 +103,25 @@ app.get('/edit/:id', (req, res) => {
 app.put('/edit', (req, res) => {
     db.collection('post').updateOne({ _id: parseInt(req.body.id) }, { $set: { title: req.body.title, date: req.body.date } }, (err, result) => {
         console.log('put요청 성공')
+        // 항상 요청 후 응답이 있어야 작동.  (게시글 수정 후 list.ejs 보여줘!) 
         res.redirect('/list')
     })
+})
+
+
+//******************** 로그인 라이브러리 셋팅 ********************//
+
+// passport
+const passport = require('passport');
+// passport-local
+const LocalStrategy = require('passport-local');
+// express-session
+const session = require('express-session');
+
+app.use(session({secret : '비밀코드', resave : true, saveUninitialized : false}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/login', (req, res) => {
+    res.render('login.ejs')
 })
