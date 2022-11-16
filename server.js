@@ -7,24 +7,28 @@ app.use(express.urlencoded({ extended: true }))
 app.set('view engine', 'ejs');
 // public폴더 사용
 app.use('/public', express.static('public'))
+require('dotenv').config()
 // MongoDB
 const MongoClient = require('mongodb').MongoClient;
 // method-override (put,delete요청 라이브러리)
 const methodOverride = require('method-override');
 const { list } = require('mongodb/lib/gridfs/grid_store');
 app.use(methodOverride('_method'))
+
+
+
 let db;
-MongoClient.connect('mongodb+srv://beenzino13:1q2w3e4r@first-db.cuypcoh.mongodb.net/?retryWrites=true&w=majority', { useUnifiedTopology: true }, (err, client) => {
+MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, (err, client) => {
     if (err) return console.log('에러~')
 
     // todoapp이라는 db에 연결
     db = client.db('todoapp');
 
     // db연결 되면 실행 할 코드 
-    app.listen(2020, () => {
+  
+    app.listen(process.env.PORT, () => {
         console.log('2020port')
-    });
-
+    })
 
     app.post('/add', (req, res) => {
         db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
@@ -124,4 +128,44 @@ app.use(passport.session());
 
 app.get('/login', (req, res) => {
     res.render('login.ejs')
+})
+app.get('/fail', (req, res) => {
+    res.render('fail.ejs')
+    console.log(req);
+    console.log(res);
+})
+app.post('/login', passport.authenticate('local', {
+    // 로그인 실패 하면 /fail로 이동 
+    failureRedirect : '/fail'
+}), (req, res) => {
+    // 로그인 성공시 home
+    res.redirect('/')
+})
+
+passport.use(new LocalStrategy({
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,
+
+}, (입력한아이디, 입력한비번, done) => {
+    console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne( { id: 입력한아이디}, (err, result) => {
+        if (err) return done(err)
+        if (!result) return done(null, false, {message: '존재하지 않는 아이디입니다.'})
+        if (입력한비번 == result.pw) {
+            return done(null, result)
+        } else {
+            return done(null, false, { message: '비밀번호가 틀렸습니다.'})
+        }
+    })
+}));
+
+// 로그인 성공시 세션 + 쿠키 생성 
+passport.serializeUser( (user, done) => {
+    done(null, user.id);
+})
+
+passport.deserializeUser( (아이디, done) => {
+    done(null, {});
 })
