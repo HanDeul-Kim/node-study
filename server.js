@@ -131,8 +131,6 @@ app.get('/login', (req, res) => {
 })
 app.get('/fail', (req, res) => {
     res.render('fail.ejs')
-    console.log(req);
-    console.log(res);
 })
 app.post('/login', passport.authenticate('local', {
     // 로그인 실패 하면 /fail로 이동 
@@ -168,4 +166,10 @@ passport.serializeUser( (user, done) => {
 
 passport.deserializeUser( (아이디, done) => {
     done(null, {});
+})
+
+//******************** search  ********************//
+// query string으로 전달한 데이터 꺼내오기
+app.get('/search', (req, res) => {
+    console.log(req.query);
 })

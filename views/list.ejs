@@ -44,6 +44,10 @@
     <%- include('nav.html') %>
     <div class="container mt-4">
         <h2 class="text-center" style="margin:30px 0;">서버에서 가져온 할 일 목록!</h2>
+        <div class="container input-group mb-2">
+            <input class="form-control" id="searchInput">
+            <button class="input-group-append btn btn-danger" id="search">검색</button>
+        </div>
         <ul class="list-group">
             <% todos.map( (val, idx)=> { %>
                 <a href="javascript:void(0);" class="list" data-id="<%= todos[idx]._id %>">
@@ -72,7 +76,7 @@
         crossorigin="anonymous"></script>
     <!-- ajax -->
     <script>
-
+        // ajax delete 요청
         $('.list_delete').click(function (e) {
             let listNum = e.target.dataset.id;
             console.log(listNum)
@@ -89,6 +93,11 @@
             })
         })
         
+        // search 기능 (query string)
+        document.getElementById('search').addEventListener('click', () => {
+            const textValue = document.getElementById('searchInput').value;
+            window.location.replace(`/search/?value=${textValue}`);
+        })
     </script>
 </body>
 
