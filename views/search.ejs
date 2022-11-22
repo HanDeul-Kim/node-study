@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <title>Home</title>
+    <style>
+        a{color:#000 !important; text-decoration: none !important;}
+
+        .list {
+            width: 100%;
+            margin: 10px 0;
+            /* position: relative; */
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            text-decoration: none;
+        }
+
+        .list_btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .list_btn button {
+            outline: none;
+            border: none;
+            background: #000;
+            border-radius: 20px;
+            padding: 5px 10px;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- nav -->
+    <%- include('nav.html') %>
+    <div class="container mt-4">
+        <h2 class="text-center" style="margin:30px 0;">검색 결과</h2>
+        <ul class="list-group">
+            <% sResult.map( (val, idx)=> { %>
+                <a href="javascript:void(0);" class="list" data-id="<%= sResult[idx]._id %>">
+                    <div class="list_content">
+                        <span style="display:block; margin:20px 0;">
+                            글번호: <%= sResult[idx]._id %>
+                        </span>
+                        <h4>할 일 제목 : <%= sResult[idx].title %>
+                        </h4>
+                        <h4>할 일 마감일 : <%= sResult[idx].date %>
+                        </h4>
+                    </div>
+                    <div class="list_btn">
+                        <button class="list_delete btn btn-danger" data-id="<%= sResult[idx]._id %>">삭제</button>
+                    </div>
+                </a>
+            <% }) %>
+
+            <!-- 검색 결과 없을 때 -->
+            <% if(sResult.length == 0) { %>
+                <h1 style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:26px;">찾으시는 리스트가 없습니다!</h1> 
+            <% } %>
+            
+            
+           
+        
+            
+        </ul>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+        crossorigin="anonymous"></script>
+    <!-- ajax -->
+    <script>
+        // ajax delete 요청
+        $('.list_delete').click(function (e) {
+            let listNum = e.target.dataset.id;
+            console.log(listNum)
+            let clicked = $(this);
+            $.ajax({
+                method: 'DELETE',
+                url: '/delete',
+                data: {_id: listNum }
+            }).done((result) => {
+                console.log('성공!')
+                clicked.parent('div').parent('a').fadeOut();
+            }).fail((xhr, testStatus, errorThrone) => {
+                console.log(xhr, testStatus, errorThrone);
+            })
+        })
+        
+        // search 기능 (query string)
+        document.getElementById('search').addEventListener('click', () => {
+            const textValue = document.getElementById('searchInput').value;
+            window.location.replace(`/search/?value=${textValue}`);
+        })
+    </script>
+</body>
+
+</html>

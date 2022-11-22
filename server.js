@@ -171,5 +171,8 @@ passport.deserializeUser( (아이디, done) => {
 //******************** search  ********************//
 // query string으로 전달한 데이터 꺼내오기
 app.get('/search', (req, res) => {
-    console.log(req.query);
+    db.collection('post').find({title: req.query.value}).toArray((err, result) => {
+        res.render('search.ejs', {sResult: result});
+        
+    })
 })
