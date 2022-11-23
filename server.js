@@ -171,8 +171,28 @@ passport.deserializeUser( (아이디, done) => {
 //******************** search  ********************//
 // query string으로 전달한 데이터 꺼내오기
 app.get('/search', (req, res) => {
-    db.collection('post').find({title: req.query.value}).toArray((err, result) => {
+    // 검색 조건
+    const requirement = [
+        {
+            $search: {
+                index: 'titleSearch',       // mongoDB 아틀라스에서 만든 search index명
+                text: {
+                    query: req.query.value,
+                    path: "title"       //  title, text 둘 다 찾고 싶으면 ['title', 'text']
+                }
+            }
+        },
+        {
+            $sort: { _id: 1},
+        },
+
+        // -- $project 연산자 -- 1 = 값 보여줘, 0 = 값 보여주지마 
+        // {
+        //     $project: { _id: 1, title: 0, date: 0,  score: { $meta: "searchScore"}}
+        // }
+    ]
+    
+    db.collection('post').aggregate(requirement).toArray((err, result) => {
         res.render('search.ejs', {sResult: result});
-        
     })
 })
