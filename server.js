@@ -25,26 +25,12 @@ MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, (err, clie
     db = client.db('todoapp');
 
     // db연결 되면 실행 할 코드 
-  
+
     app.listen(process.env.PORT, () => {
         console.log('2020port')
     })
 
-    app.post('/add', (req, res) => {
-        db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
-            let countId = result.totalPost;
-            db.collection('post').insertOne({ _id: countId + 1, title: req.body.title, date: req.body.date }, (err, res) => {
-                console.log('form 데이터 저장 완료.')
-
-                // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
-                db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, (err, result) => {
-                    if (err) { return console.log('에러') }
-                })
-            })
-        });
-
-        res.send('전송 완료!')
-    })
+    
     // 데이터를 꺼낼때나 저장할때 db.collection('')로 무조건 시작 후 find, insertOne 등등 사용 하면 된다.
 })
 
@@ -122,7 +108,7 @@ const LocalStrategy = require('passport-local');
 // express-session
 const session = require('express-session');
 
-app.use(session({secret : '비밀코드', resave : true, saveUninitialized : false}));
+app.use(session({ secret: '비밀코드', resave: true, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -132,13 +118,29 @@ app.get('/login', (req, res) => {
 app.get('/fail', (req, res) => {
     res.render('fail.ejs')
 })
+
+//******************** login!!  ********************//
 app.post('/login', passport.authenticate('local', {
     // 로그인 실패 하면 /fail로 이동 
-    failureRedirect : '/fail'
+    failureRedirect: '/fail'
 }), (req, res) => {
     // 로그인 성공시 home
     res.redirect('/')
 })
+//******************** register!!  ********************//
+app.post('/register', (req, res) => {
+    db.collection('login').findOne({ id: req.body.id }, (err, result) => {
+        if (result == null) {
+            db.collection('login').insertOne({ id: req.body.id, pw: req.body.pw }, (err, result) => {
+                res.redirect('/')
+            })
+        } else {
+            res.send('이미 가입한 아이디입니다.')
+        }
+    })
+})
+
+
 
 passport.use(new LocalStrategy({
     usernameField: 'id',
@@ -148,25 +150,45 @@ passport.use(new LocalStrategy({
 
 }, (입력한아이디, 입력한비번, done) => {
     console.log(입력한아이디, 입력한비번);
-    db.collection('login').findOne( { id: 입력한아이디}, (err, result) => {
+    db.collection('login').findOne({ id: 입력한아이디 }, (err, result) => {
         if (err) return done(err)
-        if (!result) return done(null, false, {message: '존재하지 않는 아이디입니다.'})
+        if (!result) return done(null, false, { message: '존재하지 않는 아이디입니다.' })
         if (입력한비번 == result.pw) {
             return done(null, result)
         } else {
-            return done(null, false, { message: '비밀번호가 틀렸습니다.'})
+            return done(null, false, { message: '비밀번호가 틀렸습니다.' })
         }
     })
 }));
 
 // 로그인 성공시 세션 + 쿠키 생성 
-passport.serializeUser( (user, done) => {
+passport.serializeUser((user, done) => {
     done(null, user.id);
 })
 
-passport.deserializeUser( (아이디, done) => {
+passport.deserializeUser((아이디, done) => {
     done(null, {});
 })
+
+
+app.post('/add', (req, res) => {
+    db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
+        let countId = result.totalPost;
+        const writeList = { _id: countId + 1, user: req.user._id, title: req.body.title, date: req.body.date } 
+        db.collection('post').insertOne(writeList, (err, res) => {
+            console.log('form 데이터 저장 완료.')
+
+            // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
+            db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, (err, result) => {
+                if (err) { return console.log('에러') }
+            })
+        })
+    });
+
+    res.send('전송 완료!')
+})
+
+
 
 //******************** search  ********************//
 // query string으로 전달한 데이터 꺼내오기
@@ -183,7 +205,7 @@ app.get('/search', (req, res) => {
             }
         },
         {
-            $sort: { _id: 1},
+            $sort: { _id: 1 },
         },
 
         // -- $project 연산자 -- 1 = 값 보여줘, 0 = 값 보여주지마 
@@ -191,8 +213,10 @@ app.get('/search', (req, res) => {
         //     $project: { _id: 1, title: 0, date: 0,  score: { $meta: "searchScore"}}
         // }
     ]
-    
+
     db.collection('post').aggregate(requirement).toArray((err, result) => {
-        res.render('search.ejs', {sResult: result});
+        res.render('search.ejs', { sResult: result });
     })
+
+
 })
