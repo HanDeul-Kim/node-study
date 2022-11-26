@@ -127,20 +127,6 @@ app.post('/login', passport.authenticate('local', {
     // 로그인 성공시 home
     res.redirect('/')
 })
-//******************** register!!  ********************//
-app.post('/register', (req, res) => {
-    db.collection('login').findOne({ id: req.body.id }, (err, result) => {
-        if (result == null) {
-            db.collection('login').insertOne({ id: req.body.id, pw: req.body.pw }, (err, result) => {
-                res.redirect('/')
-            })
-        } else {
-            res.send('이미 가입한 아이디입니다.')
-        }
-    })
-})
-
-
 
 passport.use(new LocalStrategy({
     usernameField: 'id',
@@ -167,17 +153,32 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((아이디, done) => {
-    done(null, {});
+    db.collection('login').findOne({ id: 아이디 }, (err, result) => {
+        done(null, result)
+    })
 })
 
+
+//******************** register!!  ********************//
+app.post('/register', (req, res) => {
+    db.collection('login').findOne({ id: req.body.id }, (err, result) => {
+        if (result == null) {
+            db.collection('login').insertOne({ id: req.body.id, pw: req.body.pw }, (err, result) => {
+                res.redirect('/')
+            })
+        } else {
+            res.send('이미 가입한 아이디입니다.')
+        }
+    })
+    
+})
 
 app.post('/add', (req, res) => {
     db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
         let countId = result.totalPost;
         const writeList = { _id: countId + 1, user: req.user._id, title: req.body.title, date: req.body.date } 
-        db.collection('post').insertOne(writeList, (err, res) => {
+        db.collection('post').insertOne(writeList, (err, result) => {
             console.log('form 데이터 저장 완료.')
-
             // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
             db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, (err, result) => {
                 if (err) { return console.log('에러') }
