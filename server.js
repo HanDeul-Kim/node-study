@@ -65,24 +65,7 @@ app.get('/detail/:id', (req, res) => {
         res.render('detail.ejs', { data: result });
     })
 })
-// delete 요청
-app.delete('/delete', (req, res) => {
-    // list.ejs에서의 ajax요청 데이터
-    console.log(req.body);
 
-    req.body._id = parseInt(req.body._id);
-
-    // deleteOne 함수 파라미터 = query문, callback
-    db.collection('post').deleteOne(req.body, (err, result) => {
-
-
-        // 응답을 꼭 설정해야 list.ejs에서의 ajax요청에서 done()이 작동함.
-        // 성공
-        res.status(200).send({ message: '성공!' })
-        // 실패
-        // res.status(500).send( {message: '실패!'} )
-    })
-})
 
 app.get('/edit/:id', (req, res) => {
     db.collection('post').findOne({ _id: Number(req.params.id) }, (err, result) => {
@@ -175,8 +158,12 @@ app.post('/register', (req, res) => {
 
 app.post('/add', (req, res) => {
     db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
+        // date 함수 
+        const offset = 1000 * 60 * 60 * 9
+        const koreaNow = new Date((new Date()).getTime() + offset)
+        
         let countId = result.totalPost;
-        const writeList = { _id: countId + 1, user: req.user._id, title: req.body.title, date: req.body.date } 
+        const writeList = { _id: countId + 1, user: req.user._id, title: req.body.title, date: req.body.date, test: koreaNow.toISOString().replace("T", " ").split('.')[0]} 
         db.collection('post').insertOne(writeList, (err, result) => {
             console.log('form 데이터 저장 완료.')
             // updateOne 파라미터 = 수정할 데이터(query문), 수정값, callback  (두 번째 파라미터 mongodb operator 참고!)
@@ -189,7 +176,24 @@ app.post('/add', (req, res) => {
     res.send('전송 완료!')
 })
 
+// delete 요청
+app.delete('/delete', (req, res) => {
+    // list.ejs에서의 ajax요청 데이터
+    console.log(req.body);
 
+    req.body._id = parseInt(req.body._id);
+    let 삭제할데이터 = { _id : req.body._id, user : req.user._id}
+    // deleteOne 함수 파라미터 = query문, callback
+    db.collection('post').deleteOne(삭제할데이터, (err, result) => {
+
+
+        // 응답을 꼭 설정해야 list.ejs에서의 ajax요청에서 done()이 작동함.
+        // 성공
+        res.status(200).send({ message: '성공!' })
+        // 실패
+        // res.status(500).send( {message: '실패!'} )
+    })
+})
 
 //******************** search  ********************//
 // query string으로 전달한 데이터 꺼내오기

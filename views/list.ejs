@@ -50,7 +50,7 @@
         </div>
         <ul class="list-group">
             <% todos.map( (val, idx)=> { %>
-                <a href="javascript:void(0);" class="list" data-id="<%= todos[idx]._id %>">
+                <a href="/detail/<%= idx + 1%>" class="list" data-id="<%= todos[idx]._id %>">
                     <div class="list_content">
                         <span style="display:block; margin:20px 0;">
                             글번호: <%= todos[idx]._id %>
@@ -58,6 +58,9 @@
                         <h4>할 일 제목 : <%= todos[idx].title %>
                         </h4>
                         <h4>할 일 마감일 : <%= todos[idx].date %>
+                        </h4>
+                        <h4 style="font-size:14px; color:dodgerblue;">
+                            <%= todos[idx].test %>
                         </h4>
                     </div>
                     <div class="list_btn">
@@ -98,6 +101,7 @@
             const textValue = document.getElementById('searchInput').value;
             window.location.replace(`/search/?value=${textValue}`);
         })
+       
     </script>
 </body>
 
