@@ -67,11 +67,6 @@ app.get('/detail/:id', (req, res) => {
 })
 
 
-app.get('/edit/:id', (req, res) => {
-    db.collection('post').findOne({ _id: Number(req.params.id) }, (err, result) => {
-        res.render('edit.ejs', { post: result })
-    })
-})
 
 app.put('/edit', (req, res) => {
     db.collection('post').updateOne({ _id: parseInt(req.body.id) }, { $set: { title: req.body.title, date: req.body.date } }, (err, result) => {
@@ -194,6 +189,29 @@ app.delete('/delete', (req, res) => {
         // res.status(500).send( {message: '실패!'} )
     })
 })
+
+
+
+app.get('/edit/:id', (req, res) => {
+    db.collection('post').findOne({ _id: Number(req.params.id), user: req.user._id }, (err, result) => {
+       
+        console.log(result);
+        if(result == null) {
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+            res.write("<script>alert('권한이 없습니다. 다시 로그인 하세요')</script>")
+            res.end();
+            
+        } else {
+            res.render('edit.ejs', { post: result })
+        }
+        
+        
+    })
+})
+
+
+
+
 
 //******************** search  ********************//
 // query string으로 전달한 데이터 꺼내오기

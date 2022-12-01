@@ -50,7 +50,8 @@
         </div>
         <ul class="list-group">
             <% todos.map( (val, idx)=> { %>
-                <a href="/detail/<%= idx + 1%>" class="list" data-id="<%= todos[idx]._id %>">
+                <!-- <a href="/detail/<%= idx + 1%>" class="list" data-id="<%= todos[idx]._id %>"> -->
+                <a href="javascript:void(0);" class="list" data-id="<%= todos[idx]._id %>">
                     <div class="list_content">
                         <span style="display:block; margin:20px 0;">
                             글번호: <%= todos[idx]._id %>
@@ -102,6 +103,12 @@
             window.location.replace(`/search/?value=${textValue}`);
         })
        
+        const lists = document.querySelectorAll('.list');
+        lists.forEach( (e,idx) => {
+            e.addEventListener('click', function(e) {
+                if(e.target.className == 'list') {this.href = `/detail/${idx + 1}`} 
+            })
+        })
     </script>
 </body>
 
