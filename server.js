@@ -47,7 +47,6 @@ app.get('/', (req, res) => {
     res.render('index.ejs');
 })
 app.get('/write', (req, res) => {
-    // res.sendFile(__dirname + '/write.html')
     res.render('write.ejs');
 })
 // ejs 파일 보내보기 (views라는 이름의 폴더를 만들고 넣어야함.)
@@ -128,6 +127,7 @@ passport.use(new LocalStrategy({
 // 로그인 성공시 세션 + 쿠키 생성 
 passport.serializeUser((user, done) => {
     done(null, user.id);
+    
 })
 
 passport.deserializeUser((아이디, done) => {
@@ -151,7 +151,9 @@ app.post('/register', (req, res) => {
     
 })
 
+
 app.post('/add', (req, res) => {
+
     db.collection('counter').findOne({ name: '게시물갯수' }, (err, result) => {
         // date 함수 
         const offset = 1000 * 60 * 60 * 9
