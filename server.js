@@ -16,7 +16,6 @@ const { list } = require('mongodb/lib/gridfs/grid_store');
 app.use(methodOverride('_method'))
 
 
-
 let db;
 MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, (err, client) => {
     if (err) return console.log('에러~')
@@ -41,11 +40,7 @@ app.get('/news', (req, res) => {
     res.send('news 플랫폼 입니다.')
 })
 
-// html 파일 보내보기
-app.get('/', (req, res) => {
-    // res.sendFile(__dirname + '/index.html')
-    res.render('index.ejs');
-})
+
 app.get('/write', (req, res) => {
     res.render('write.ejs');
 })
@@ -102,7 +97,10 @@ app.post('/login', passport.authenticate('local', {
     failureRedirect: '/fail'
 }), (req, res) => {
     // 로그인 성공시 home
-    res.redirect('/')
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+    res.write(`<script>alert('${req.body.id}님 반갑습니다!'); window.location.replace('/')</script>;`)
+    res.end();
+    // res.redirect('/')
 })
 
 passport.use(new LocalStrategy({
@@ -127,7 +125,6 @@ passport.use(new LocalStrategy({
 // 로그인 성공시 세션 + 쿠키 생성 
 passport.serializeUser((user, done) => {
     done(null, user.id);
-    
 })
 
 passport.deserializeUser((아이디, done) => {
@@ -142,15 +139,32 @@ app.post('/register', (req, res) => {
     db.collection('login').findOne({ id: req.body.id }, (err, result) => {
         if (result == null) {
             db.collection('login').insertOne({ id: req.body.id, pw: req.body.pw }, (err, result) => {
-                res.redirect('/')
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+                res.write(`<script>alert('${req.body.id}님 회원가입을 축하드립니다!'); window.location.replace('/')</script>;`)
+                res.end();
             })
         } else {
-            res.send('이미 가입한 아이디입니다.')
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+            res.write("<script>alert('중복된 아이디입니다!'); window.location.replace('/login')</script>;")
+            res.end();
         }
     })
     
 })
+// html 파일 보내보기
+app.get('/', (req, res) => {
+    let newArr = [];
+    newArr.push(req.user);
+    res.render('index.ejs', {tests: newArr});
 
+    if(req.user == null) {
+        // res.render('index.ejs');
+        console.log('없다')
+    } else {
+        console.log('잇다')
+        // res.render('index2.ejs', { tests: newArr });
+    }
+})
 
 app.post('/add', (req, res) => {
 
@@ -197,10 +211,10 @@ app.delete('/delete', (req, res) => {
 app.get('/edit/:id', (req, res) => {
     db.collection('post').findOne({ _id: Number(req.params.id), user: req.user._id }, (err, result) => {
        
-        console.log(result);
+        
         if(result == null) {
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-            res.write("<script>alert('권한이 없습니다. 다시 로그인 하세요')</script>")
+            res.write(`<script>alert('권한이 없습니다. 회원정보가 다릅니다.'); window.location.replace('/detail/${req.params.id}')</script>`)
             res.end();
             
         } else {
