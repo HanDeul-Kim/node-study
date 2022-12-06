@@ -46,12 +46,10 @@ app.get('/write', (req, res) => {
 })
 // ejs 파일 보내보기 (views라는 이름의 폴더를 만들고 넣어야함.)
 app.get('/list', (req, res) => {
-
     // post라는 collection안의 모든 데이터를 꺼내보자
     db.collection('post').find().toArray((err, result) => {
         res.render('list.ejs', { todos: result });
     });
-
 })
 app.get('/detail/:id', (req, res) => {
 
@@ -103,6 +101,22 @@ app.post('/login', passport.authenticate('local', {
     // res.redirect('/')
 })
 
+// 로그인 상태관리 
+app.get('/mypage', 로그인했니, (req, res) => {
+    console.log(req.user);
+    res.render('mypage.ejs', {사용자: req.user})
+})
+
+function 로그인했니(req, res, next) {
+    if(req.user) {
+        next()
+    } else {
+        res.send('로그인 안되어있음.')
+    }
+}
+
+
+
 passport.use(new LocalStrategy({
     usernameField: 'id',
     passwordField: 'pw',
@@ -121,6 +135,7 @@ passport.use(new LocalStrategy({
         }
     })
 }));
+
 
 // 로그인 성공시 세션 + 쿠키 생성 
 passport.serializeUser((user, done) => {
@@ -153,16 +168,17 @@ app.post('/register', (req, res) => {
 })
 // html 파일 보내보기
 app.get('/', (req, res) => {
-    let newArr = [];
-    newArr.push(req.user);
-    res.render('index.ejs', {tests: newArr});
+   
+    // res.render('index.ejs');
 
     if(req.user == null) {
-        // res.render('index.ejs');
+        res.render('index.ejs');
         console.log('없다')
     } else {
         console.log('잇다')
-        // res.render('index2.ejs', { tests: newArr });
+        let newArr = [];
+        newArr.push(req.user);
+        res.render('index.ejs', { tests: newArr });
     }
 })
 
