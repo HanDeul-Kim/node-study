@@ -41,16 +41,8 @@ app.get('/news', (req, res) => {
 })
 
 
-app.get('/write', (req, res) => {
-    res.render('write.ejs');
-})
-// ejs 파일 보내보기 (views라는 이름의 폴더를 만들고 넣어야함.)
-app.get('/list', (req, res) => {
-    // post라는 collection안의 모든 데이터를 꺼내보자
-    db.collection('post').find().toArray((err, result) => {
-        res.render('list.ejs', { todos: result });
-    });
-})
+
+
 app.get('/detail/:id', (req, res) => {
 
     db.collection('post').findOne({ _id: Number(req.params.id) }, (err, result) => {
@@ -83,7 +75,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/login', (req, res) => {
-    res.render('login.ejs')
+    let newArr = [];
+    newArr.push(req.user);
+    res.render('index.ejs', { text: newArr });
+    res.render('login.ejs', { text: newArr})
 })
 app.get('/fail', (req, res) => {
     res.render('fail.ejs')
@@ -95,18 +90,36 @@ app.post('/login', passport.authenticate('local', {
     failureRedirect: '/fail'
 }), (req, res) => {
     // 로그인 성공시 home
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-    res.write(`<script>alert('${req.body.id}님 반갑습니다!'); window.location.replace('/')</script>;`)
-    res.end();
+    res.send(`<script>alert('${req.body.id}님 반갑습니다!'); window.location.replace('/')</script>;`)
     // res.redirect('/')
 })
 
+// html 파일 보내보기
+app.get('/', (req, res) => {
+   
+    // res.render('index.ejs');
+
+    if(req.user == null) {
+        res.render('index.ejs', {text: 'Login'})
+        console.log('없다')
+    } else {
+        console.log('잇다')
+        let newArr = [];
+        newArr.push(req.user);
+        res.render('index.ejs', { text: newArr });
+    }
+})
+
+app.get('/write', 로그인했니2, (req, res) => {
+    res.render('write.ejs');
+})
 // 로그인 상태관리 
 app.get('/mypage', 로그인했니, (req, res) => {
     console.log(req.user);
     res.render('mypage.ejs', {사용자: req.user})
 })
 
+// 미들웨어
 function 로그인했니(req, res, next) {
     if(req.user) {
         next()
@@ -114,8 +127,21 @@ function 로그인했니(req, res, next) {
         res.send('로그인 안되어있음.')
     }
 }
+function 로그인했니2(req, res, next) {
+    if(req.user) {
+        next();
+    } else {
+        res.send(`<script>alert('로그인을 먼저 해주세요.'); window.location.replace('/')</script>;`)
+    }
+}
 
-
+// ejs 파일 보내보기 (views라는 이름의 폴더를 만들고 넣어야함.)
+app.get('/list', 로그인했니2, (req, res) => {
+    // post라는 collection안의 모든 데이터를 꺼내보자
+    db.collection('post').find().toArray((err, result) => {
+        res.render('list.ejs', { todos: result });
+    });
+})
 
 passport.use(new LocalStrategy({
     usernameField: 'id',
@@ -154,33 +180,15 @@ app.post('/register', (req, res) => {
     db.collection('login').findOne({ id: req.body.id }, (err, result) => {
         if (result == null) {
             db.collection('login').insertOne({ id: req.body.id, pw: req.body.pw }, (err, result) => {
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-                res.write(`<script>alert('${req.body.id}님 회원가입을 축하드립니다!'); window.location.replace('/')</script>;`)
-                res.end();
+                res.send(`<script>alert('${req.body.id}님 회원가입을 축하드립니다!'); window.location.replace('/')</script>;`)
             })
         } else {
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-            res.write("<script>alert('중복된 아이디입니다!'); window.location.replace('/login')</script>;")
-            res.end();
+            res.send("<script>alert('중복된 아이디입니다!'); window.location.replace('/login')</script>;")
         }
     })
     
 })
-// html 파일 보내보기
-app.get('/', (req, res) => {
-   
-    // res.render('index.ejs');
 
-    if(req.user == null) {
-        res.render('index.ejs');
-        console.log('없다')
-    } else {
-        console.log('잇다')
-        let newArr = [];
-        newArr.push(req.user);
-        res.render('index.ejs', { tests: newArr });
-    }
-})
 
 app.post('/add', (req, res) => {
 
@@ -229,9 +237,7 @@ app.get('/edit/:id', (req, res) => {
        
         
         if(result == null) {
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-            res.write(`<script>alert('권한이 없습니다. 회원정보가 다릅니다.'); window.location.replace('/detail/${req.params.id}')</script>`)
-            res.end();
+            res.send(`<script>alert('권한이 없습니다. 회원정보가 다릅니다.'); window.location.replace('/detail/${req.params.id}')</script>`)
             
         } else {
             res.render('edit.ejs', { post: result })
