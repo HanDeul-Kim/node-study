@@ -90,10 +90,11 @@
                 url: '/delete',
                 data: {_id: listNum }
             }).done((result) => {
-                console.log('성공!')
+                console.log('삭제 성공!')
                 clicked.parent('div').parent('a').fadeOut();
             }).fail((xhr, testStatus, errorThrone) => {
                 console.log(xhr, testStatus, errorThrone);
+                alert('권한이 없습니다. 회원정보가 다릅니다.')
             })
         })
         

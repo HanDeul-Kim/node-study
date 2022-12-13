@@ -77,7 +77,6 @@ app.use(passport.session());
 app.get('/login', (req, res) => {
     const newArr = [];
     newArr.push(req.user);
-    console.log(newArr);
     res.render('login.ejs', {text: newArr})
 })
 app.get('/fail', (req, res) => {
@@ -104,7 +103,7 @@ app.get('/write', 로그인했니, (req, res) => {
 })
 // 로그인 상태관리 
 app.get('/mypage', 로그인했니, (req, res) => {
-    console.log(req.user);
+    // console.log(req.user);
     res.render('mypage.ejs', {user: req.user})
 })
 
@@ -132,7 +131,7 @@ passport.use(new LocalStrategy({
     passReqToCallback: false,
 
 }, (입력한아이디, 입력한비번, done) => {
-    console.log(입력한아이디, 입력한비번);
+    // console.log(입력한아이디, 입력한비번);
     db.collection('login').findOne({ id: 입력한아이디 }, (err, result) => {
         if (err) return done(err)
         if (!result) return done(null, false, { message: '존재하지 않는 아이디입니다.' })
@@ -196,19 +195,19 @@ app.post('/add', (req, res) => {
 // delete 요청
 app.delete('/delete', (req, res) => {
     // list.ejs에서의 ajax요청 데이터
-    console.log(req.body);
-
-    req.body._id = parseInt(req.body._id);
-    let 삭제할데이터 = { _id : req.body._id, user : req.user._id}
-    // deleteOne 함수 파라미터 = query문, callback
-    db.collection('post').deleteOne(삭제할데이터, (err, result) => {
-
-
-        // 응답을 꼭 설정해야 list.ejs에서의 ajax요청에서 done()이 작동함.
-        // 성공
-        res.status(200).send({ message: '성공!' })
-        // 실패
-        // res.status(500).send( {message: '실패!'} )
+  
+    // console.log(req.body);
+    // console.log(req.user);
+    db.collection('post').findOne({ _id: Number(req.body._id), user: req.user._id}, (err, result) => {
+        if(result == null) {
+            res.status(500).send({message:'실패'})
+        } else {
+            req.body._id = parseInt(req.body._id);
+            let 삭제할데이터 = { _id: req.body._id, user: req.user._id}
+            db.collection('post').deleteOne(삭제할데이터, (err, result) => {
+                res.status(200).send({message: '성공'})
+            })
+        }
     })
 })
 
@@ -216,17 +215,17 @@ app.delete('/delete', (req, res) => {
 
 app.get('/edit/:id', (req, res) => {
     db.collection('post').findOne({ _id: Number(req.params.id), user: req.user._id }, (err, result) => {
-       
-        
         if(result == null) {
             res.send(`<script>alert('권한이 없습니다. 회원정보가 다릅니다.'); window.location.replace('/detail/${req.params.id}')</script>`)
-            
         } else {
             res.render('edit.ejs', { post: result })
         }
-        
-        
     })
+})
+
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/')
 })
 
 
