@@ -259,6 +259,42 @@ app.get('/search', (req, res) => {
     db.collection('post').aggregate(requirement).toArray((err, result) => {
         res.render('search.ejs', { sResult: result });
     })
+})
 
 
+// multer (image 업로드) 라이브러리
+let multer = require('multer')
+var storage = multer.diskStorage({
+    // image저장 경로
+    destination: function(req, file, cb) {
+        cb(null, './public/image')
+    },
+    // 저장한 image 파일명 설정
+    filename: function(req, file, cb) {
+        cb(null, file.originalname)
+    }
+})
+var path = require('path');
+var upload = multer({
+    storage: storage,
+    fileFilter: function (req, file, callback) {
+        var ext = path.extname(file.originalname);
+        if(ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg') {
+            return callback(new Error('PNG, JPG만 업로드하세요'))
+        }
+        callback(null, true)
+    },
+    limits:{
+        fileSize: 1024 * 1024
+    }
+});
+
+app.get('/upload', (req, res) => {
+    res.render('upload.ejs')
+})
+app.post('/upload', upload.single('uploadImg'), (req, res) => {
+    res.send('업로드 완료')
+})
+app.get('/image/:imgName', (req, res) => {
+    res.sendFile( __dirname + '/public/image/' + req.params.imgName)
 })
